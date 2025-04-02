@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEET Practice Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 10px;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        /* Initially hide submit button, result & details */
+        
+        #submit-btn,
+        .result,
+        .details-container {
+            display: none;
+        }
+        
+        .student-info {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+        }
+        
+        .timer {
+            font-size: 18px;
+            font-weight: bold;
+            color: red;
+        }
+        
+        .section {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e6f7ff;
+            border-radius: 5px;
+            text-align: left;
+        }
+        
+        .question {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .options label {
+            display: block;
+            padding: 5px;
+        }
+        
+        button {
+            padding: 10px;
+            font-size: 18px;
+            color: white;
+            background: green;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        
+        button:hover {
+            background: darkgreen;
+        }
+        
+        .result {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .details-container {
+            text-align: left;
+            margin-top: 20px;
+            padding: 10px;
+            background: #fff3cd;
+            border-radius: 5px;
+            border: 1px solid #ffeeba;
+        }
+        
+        footer {
+            margin-top: 50px;
+            padding: 10px;
+            background: #222;
+            color: white;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Start Page -->
+    <div class="container" id="start-container">
+        <h1>NEET Practice Quiz</h1>
+        <p>Enter your details to begin the test</p>
+        <input type="text" id="student-name" placeholder="Enter Your Name" required />
+        <input type="date" id="dob" required />
+        <button onclick="startQuiz()">Start Quiz</button>
+    </div>
+
+    <!-- Quiz Container -->
+    <div class="container" id="quiz-container" style="display: none;">
+        <div class="student-info">
+            <p><strong>Student: </strong><span id="display-name"></span></p>
+            <p class="timer" id="timer">Time Left: 03:20:00</p>
+        </div>
+
+        <!-- Physics Section -->
+        <div id="physics-section" class="section">
+            <h2>Physics</h2>
+            <div id="physics-questions"></div>
+        </div>
+
+        <!-- Chemistry Section -->
+        <div id="chemistry-section" class="section">
+            <h2>Chemistry</h2>
+            <div id="chemistry-questions"></div>
+        </div>
+
+        <!-- Botany Section -->
+        <div id="botany-section" class="section">
+            <h2>Botany</h2>
+            <div id="botany-questions"></div>
+        </div>
+
+        <!-- Zoology Section -->
+        <div id="zoology-section" class="section">
+            <h2>Zoology</h2>
+            <div id="zoology-questions"></div>
+        </div>
+
+        <button id="submit-btn" onclick="calculateScore()">Submit Quiz</button>
+        <div id="result-container" class="result"></div>
+        <button id="show-details-btn" onclick="toggleDetails()">Show Correct Answers</button>
+        <div id="details-container" class="details-container"></div>
+    </div>
+
+    <footer>
+        Developed by Priyanshu Aryan Panda (instagram: @priyanshu_aryan_panda)
+    </footer>
+
+    <script>
+        let timer = (3 * 60 * 60) + 1200; // 3 hours in seconds
+        let timerDisplay = document.getElementById("timer");
+        let interval;
+        let detailedResultHTML = ""; // Will store detailed breakdown
+        let startTime; // To record the quiz start time
+
+        function startQuiz() {
+            let name = document.getElementById("student-name").value;
+            let dob = document.getElementById("dob").value;
+            if (name === "" || dob === "") {
+                alert("Please enter your Name and Date of Birth.");
+                return;
+            }
+            document.getElementById("display-name").innerText = name;
+            document.getElementById("start-container").style.display = "none";
+            document.getElementById("quiz-container").style.display = "block";
+            startTime = new Date(); // Record the start time
+            startTimer();
+            loadQuestions();
+        }
+
+        function startTimer() {
+            interval = setInterval(() => {
+                let hours = Math.floor(timer / 3600);
+                let minutes = Math.floor((timer % 3600) / 60);
+                let seconds = timer % 60;
+                // Format with leading zeros:
+                hours = hours < 10 ? "0" + hours : hours;
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+                timerDisplay.innerText = `Time Left: ${hours}:${minutes}:${seconds}`;
+                if (timer <= 0) {
+                    clearInterval(interval);
+                    alert("Time's up! The quiz will now be submitted.");
+                    calculateScore();
+                }
+                timer--;
+            }, 1000);
+        }
+
+        // Sample questions are provided below.
+        // Replace or add your complete set of questions as needed.
+        const questions = {
+            physics: [{
+                    question: "What is the SI unit of force?",
+                    options: ["Newton", "Pascal", "Joule", "Watt"],
+                    answer: "Newton"
+                }, {
+                    question: "What is the speed of light?",
+                    options: ["3 × 10⁸ m/s", "3 × 10⁶ m/s", "1 × 10⁶ m/s", "5 × 10⁸ m/s"],
+                    answer: "3 × 10⁸ m/s"
+                }, {
+                    question: "What is the unit of electric current?",
+                    options: ["Volt", "Ampere", "Ohm", "Watt"],
+                    answer: "Ampere"
+                }, {
+                    question: "What is the acceleration due to gravity on Earth?",
+                    options: ["9.8 m/s²", "10 m/s²", "8.9 m/s²", "12 m/s²"],
+                    answer: "9.8 m/s²"
+                }, {
+                    question: "Which law states that for every action, there is an equal and opposite reaction?",
+                    options: ["Newton's First Law", "Newton's Second Law", "Newton's Third Law", "Kepler’s Law"],
+                    answer: "Newton's Third Law"
+                }, {
+                    question: "What is the SI unit of work?",
+                    options: ["Joule", "Newton", "Watt", "Pascal"],
+                    answer: "Joule"
+                }, {
+                    question: "Which type of mirror is used in vehicle side mirrors?",
+                    options: ["Concave", "Convex", "Plane", "Parabolic"],
+                    answer: "Convex"
+                }, {
+                    question: "Which phenomenon causes the sky to appear blue?",
+                    options: ["Diffraction", "Scattering", "Reflection", "Refraction"],
+                    answer: "Scattering"
+                }, {
+                    question: "Which of the following is a scalar quantity?",
+                    options: ["Velocity", "Displacement", "Work", "Acceleration"],
+                    answer: "Work"
+                }, {
+                    question: "The rate of change of momentum is known as?",
+                    options: ["Force", "Work", "Power", "Acceleration"],
+                    answer: "Force"
+                }, {
+                    question: "What is the time period of a simple pendulum dependent on?",
+                    options: ["Length", "Mass", "Amplitude", "None of these"],
+                    answer: "Length"
+                }, {
+                    question: "Which property of a body resists change in its state of motion?",
+                    options: ["Momentum", "Velocity", "Inertia", "Force"],
+                    answer: "Inertia"
+                }, {
+                    question: "The power of a convex lens is positive or negative?",
+                    options: ["Positive", "Negative", "Zero", "Depends on focal length"],
+                    answer: "Positive"
+                }, {
+                    question: "Which wave phenomenon explains why sound bends around obstacles?",
+                    options: ["Refraction", "Reflection", "Diffraction", "Interference"],
+                    answer: "Diffraction"
+                }, {
+                    question: "Which color of light has the shortest wavelength?",
+                    options: ["Red", "Green", "Blue", "Violet"],
+                    answer: "Violet"
+                }, {
+                    question: "What is the SI unit of pressure?",
+                    options: ["Joule", "Pascal", "Newton", "Watt"],
+                    answer: "Pascal"
+                }, {
+                    question: "Which type of energy is stored in a stretched rubber band?",
+                    options: ["Kinetic", "Potential", "Thermal", "Nuclear"],
+                    answer: "Potential"
+                }, {
+                    question: "What is the unit of electrical resistance?",
+                    options: ["Ohm", "Volt", "Watt", "Ampere"],
+                    answer: "Ohm"
+                }, {
+                    question: "Which law states that voltage is directly proportional to current?",
+                    options: ["Ohm's Law", "Faraday’s Law", "Kirchhoff’s Law", "Lenz’s Law"],
+                    answer: "Ohm's Law"
+                }, {
+                    question: "Which type of wave does not require a medium to propagate?",
+                    options: ["Sound waves", "Water waves", "Electromagnetic waves", "Seismic waves"],
+                    answer: "Electromagnetic waves"
+                }, {
+                    question: "Which has the highest speed?",
+                    options: ["Sound", "Light", "Water waves", "Air currents"],
+                    answer: "Light"
+                }, {
+                    question: "What is the escape velocity from Earth’s surface?",
+                    options: ["9.8 km/s", "11.2 km/s", "7.9 km/s", "15 km/s"],
+                    answer: "11.2 km/s"
+                }, {
+                    question: "What is the angle of incidence when a light ray strikes a mirror perpendicularly?",
+                    options: ["0°", "45°", "90°", "Depends on the mirror"],
+                    answer: "0°"
+                }, {
+                    question: "Which planet has the strongest gravitational field?",
+                    options: ["Earth", "Mars", "Jupiter", "Venus"],
+                    answer: "Jupiter"
+                }, {
+                    question: "What is the unit of frequency?",
+                    options: ["Joule", "Hertz", "Newton", "Watt"],
+                    answer: "Hertz"
+                }, {
+                    question: "Which of the following is a renewable energy source?",
+                    options: ["Coal", "Petroleum", "Solar energy", "Natural gas"],
+                    answer: "Solar energy"
+                }, {
+                    question: "Which lens is used to correct myopia (nearsightedness)?",
+                    options: ["Convex", "Concave", "Plane", "Cylindrical"],
+                    answer: "Concave"
+                }, {
+                    question: "Which scientist discovered the electron?",
+                    options: ["Newton", "Faraday", "Thomson", "Rutherford"],
+                    answer: "Thomson"
+                }, {
+                    question: "Which gas is the most abundant in Earth's atmosphere?",
+                    options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"],
+                    answer: "Nitrogen"
+                }, {
+                    question: "Which device measures electric current?",
+                    options: ["Voltmeter", "Ammeter", "Galvanometer", "Wattmeter"],
+                    answer: "Ammeter"
+                }, {
+                    question: "Which of the following is an example of a contact force?",
+                    options: ["Gravity", "Magnetic Force", "Friction", "Electrostatic Force"],
+                    answer: "Friction"
+                }, {
+                    question: "What type of motion does the Earth exhibit around the Sun?",
+                    options: ["Rectilinear", "Rotational", "Vibratory", "Revolution"],
+                    answer: "Revolution"
+                }, {
+                    question: "What is the SI unit of power?",
+                    options: ["Watt", "Joule", "Newton", "Volt"],
+                    answer: "Watt"
+                }, {
+                    question: "Which principle explains why ships float?",
+                    options: ["Pascal’s Law", "Archimedes’ Principle", "Newton’s Law", "Bernoulli’s Principle"],
+                    answer: "Archimedes’ Principle"
+                }, {
+                    question: "Which material is the best conductor of electricity?",
+                    options: ["Copper", "Aluminum", "Iron", "Wood"],
+                    answer: "Copper"
+                }, {
+                    question: "What is the freezing point of water in Kelvin?",
+                    options: ["0 K", "273 K", "373 K", "100 K"],
+                    answer: "273 K"
+                }, {
+                    question: "Which component in a circuit stores charge?",
+                    options: ["Resistor", "Capacitor", "Inductor", "Diode"],
+                    answer: "Capacitor"
+                }, {
+                    question: "What is the speed of sound in air at room temperature?",
+                    options: ["330 m/s", "1500 m/s", "300,000 m/s", "5000 m/s"],
+                    answer: "330 m/s"
+                }, {
+                    question: "Which is the best thermally insulating material?",
+                    options: ["Metal", "Plastic", "Wood", "Glass wool"],
+                    answer: "Glass wool"
+                }, {
+                    question: "Which of these laws states that charge cannot be created or destroyed?",
+                    options: ["Law of Conservation of Mass", "Law of Conservation of Charge", "Ohm’s Law", "Coulomb’s Law"],
+                    answer: "Law of Conservation of Charge"
+                }, {
+                    question: "Which force keeps planets in orbit around the Sun?",
+                    options: ["Magnetic Force", "Centripetal Force", "Gravitational Force", "Electrostatic Force"],
+                    answer: "Gravitational Force"
+                }, {
+                    question: "What happens to the resistance of a wire when its length is doubled?",
+                    options: ["Doubles", "Halves", "Remains same", "Quadruples"],
+                    answer: "Doubles"
+                }, {
+                    question: "Which force is responsible for tides on Earth?",
+                    options: ["Wind", "Gravity", "Magnetic", "Electrostatic"],
+                    answer: "Gravity"
+                }, {
+                    question: "Which of these is an example of kinetic energy?",
+                    options: ["A stretched bow", "A moving car", "A compressed spring", "A book on a table"],
+                    answer: "A moving car"
+                }, {
+                    question: "Which phenomenon explains why a pencil appears bent in water?",
+                    options: ["Reflection", "Refraction", "Diffraction", "Interference"],
+                    answer: "Refraction"
+                }
+
+            ],
+            chemistry: [{
+                    question: "What is the atomic number of Carbon?",
+                    options: ["6", "8", "12", "16"],
+                    answer: "6"
+                }, {
+                    question: "What is the chemical formula of water?",
+                    options: ["H2O", "CO2", "O2", "H2"],
+                    answer: "H2O"
+                }, {
+                    question: "What is the chemical formula of water?",
+                    options: ["H2O", "CO2", "O2", "NaCl"],
+                    answer: "H2O"
+                }, {
+                    question: "Which gas is known as laughing gas?",
+                    options: ["Nitrogen", "Oxygen", "Nitrous Oxide", "Carbon Dioxide"],
+                    answer: "Nitrous Oxide"
+                }, {
+                    question: "Which element has the highest electronegativity?",
+                    options: ["Fluorine", "Oxygen", "Chlorine", "Neon"],
+                    answer: "Fluorine"
+                }, {
+                    question: "What is the pH of a neutral solution?",
+                    options: ["0", "7", "14", "10"],
+                    answer: "7"
+                }, {
+                    question: "Which metal is the best conductor of electricity?",
+                    options: ["Iron", "Copper", "Silver", "Gold"],
+                    answer: "Silver"
+                }, {
+                    question: "Which acid is found in lemon?",
+                    options: ["Acetic acid", "Sulfuric acid", "Citric acid", "Hydrochloric acid"],
+                    answer: "Citric acid"
+                }, {
+                    question: "What is the atomic number of carbon?",
+                    options: ["12", "14", "6", "8"],
+                    answer: "6"
+                }, {
+                    question: "Which gas is used in balloons to make them float?",
+                    options: ["Oxygen", "Nitrogen", "Helium", "Hydrogen"],
+                    answer: "Helium"
+                }, {
+                    question: "What is the chemical symbol of gold?",
+                    options: ["Au", "Ag", "Pb", "Hg"],
+                    answer: "Au"
+                }, {
+                    question: "Which type of bond is present in NaCl?",
+                    options: ["Covalent", "Ionic", "Metallic", "Hydrogen"],
+                    answer: "Ionic"
+                }, {
+                    question: "What is the common name of sodium bicarbonate?",
+                    options: ["Bleaching powder", "Baking soda", "Washing soda", "Quick lime"],
+                    answer: "Baking soda"
+                }, {
+                    question: "Which metal is liquid at room temperature?",
+                    options: ["Mercury", "Lead", "Aluminum", "Iron"],
+                    answer: "Mercury"
+                }, {
+                    question: "Which gas is responsible for global warming?",
+                    options: ["Oxygen", "Carbon Dioxide", "Hydrogen", "Argon"],
+                    answer: "Carbon Dioxide"
+                }, {
+                    question: "What is the main component of natural gas?",
+                    options: ["Methane", "Ethane", "Propane", "Butane"],
+                    answer: "Methane"
+                }, {
+                    question: "Which element is used in making solar panels?",
+                    options: ["Gold", "Silicon", "Copper", "Iron"],
+                    answer: "Silicon"
+                }, {
+                    question: "What is the lightest element?",
+                    options: ["Helium", "Hydrogen", "Oxygen", "Nitrogen"],
+                    answer: "Hydrogen"
+                }, {
+                    question: "Which acid is used in car batteries?",
+                    options: ["Hydrochloric acid", "Sulfuric acid", "Nitric acid", "Acetic acid"],
+                    answer: "Sulfuric acid"
+                }, {
+                    question: "What is the molecular formula of methane?",
+                    options: ["CH4", "C2H6", "C3H8", "C4H10"],
+                    answer: "CH4"
+                }, {
+                    question: "Which vitamin is known as ascorbic acid?",
+                    options: ["Vitamin A", "Vitamin C", "Vitamin D", "Vitamin B12"],
+                    answer: "Vitamin C"
+                }, {
+                    question: "What is the main constituent of LPG?",
+                    options: ["Methane", "Propane", "Butane", "Ethane"],
+                    answer: "Butane"
+                }, {
+                    question: "What is dry ice?",
+                    options: ["Frozen water", "Solid CO2", "Solid nitrogen", "Solid oxygen"],
+                    answer: "Solid CO2"
+                }, {
+                    question: "Which element is used in making filaments of light bulbs?",
+                    options: ["Copper", "Silver", "Tungsten", "Gold"],
+                    answer: "Tungsten"
+                }, {
+                    question: "What is the chemical formula of rust?",
+                    options: ["Fe2O3", "FeO", "Fe3O4", "Fe2O"],
+                    answer: "Fe2O3"
+                }, {
+                    question: "Which gas turns lime water milky?",
+                    options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"],
+                    answer: "Carbon Dioxide"
+                }, {
+                    question: "Which element is found in all organic compounds?",
+                    options: ["Hydrogen", "Carbon", "Oxygen", "Nitrogen"],
+                    answer: "Carbon"
+                }, {
+                    question: "Which acid is used in vinegar?",
+                    options: ["Sulfuric acid", "Acetic acid", "Nitric acid", "Hydrochloric acid"],
+                    answer: "Acetic acid"
+                }, {
+                    question: "Which noble gas is used in advertisement lights?",
+                    options: ["Helium", "Neon", "Argon", "Krypton"],
+                    answer: "Neon"
+                }, {
+                    question: "Which metal reacts violently with water?",
+                    options: ["Gold", "Iron", "Sodium", "Copper"],
+                    answer: "Sodium"
+                }, {
+                    question: "What is the chemical name of table salt?",
+                    options: ["Sodium chloride", "Potassium chloride", "Calcium carbonate", "Sodium carbonate"],
+                    answer: "Sodium chloride"
+                }, {
+                    question: "Which metal is most reactive?",
+                    options: ["Iron", "Copper", "Potassium", "Silver"],
+                    answer: "Potassium"
+                }, {
+                    question: "Which gas is known as marsh gas?",
+                    options: ["Methane", "Ethane", "Propane", "Butane"],
+                    answer: "Methane"
+                }, {
+                    question: "What is the formula of ammonia?",
+                    options: ["NH3", "NO2", "N2O", "NH4"],
+                    answer: "NH3"
+                }, {
+                    question: "Which substance is used in matchsticks?",
+                    options: ["Phosphorus", "Sulfur", "Potassium", "Magnesium"],
+                    answer: "Phosphorus"
+                }, {
+                    question: "Which metal is used in thermometers?",
+                    options: ["Iron", "Lead", "Mercury", "Aluminum"],
+                    answer: "Mercury"
+                }, {
+                    question: "What is the atomic number of oxygen?",
+                    options: ["6", "8", "10", "12"],
+                    answer: "8"
+                }, {
+                    question: "What is the chemical formula of glucose?",
+                    options: ["C6H12O6", "C12H22O11", "C2H6O", "CH3OH"],
+                    answer: "C6H12O6"
+                }, {
+                    question: "Which element is essential for the production of hemoglobin?",
+                    options: ["Iron", "Calcium", "Magnesium", "Potassium"],
+                    answer: "Iron"
+                }, {
+                    question: "What is the SI unit of concentration?",
+                    options: ["Molarity", "Molality", "Normality", "ppm"],
+                    answer: "Molarity"
+                }, {
+                    question: "What is the charge of a neutron?",
+                    options: ["Positive", "Negative", "Neutral", "Depends on isotope"],
+                    answer: "Neutral"
+                }, {
+                    question: "Which metal is commonly used for galvanization?",
+                    options: ["Copper", "Zinc", "Aluminum", "Iron"],
+                    answer: "Zinc"
+                }, {
+                    question: "What is the molarity of a solution prepared by dissolving 58.5 grams of NaCl in 1 liter of solution?",
+                    options: ["1 M", "0.5 M", "2 M", "3 M"],
+                    answer: "1 M"
+                },
+
+                {
+                    question: "Calculate the number of moles in 22 grams of CO2.",
+                    options: ["0.5 mol", "1 mol", "1.5 mol", "2 mol"],
+                    answer: "0.5 mol"
+                },
+
+                {
+                    question: "How many grams of water are produced when 16 grams of oxygen react completely with hydrogen (2H2 + O2 → 2H2O)?",
+                    options: ["18 g", "16 g", "20 g", "36 g"],
+                    answer: "18 g"
+                }
+
+            ],
+            botany: [{
+                    question: "What is the powerhouse of the cell?",
+                    options: ["Nucleus", "Ribosome", "Mitochondria", "Golgi body"],
+                    answer: "Mitochondria"
+                }, {
+                    question: "Which pigment is responsible for photosynthesis?",
+                    options: ["Chlorophyll", "Carotene", "Xanthophyll", "Anthocyanin"],
+                    answer: "Chlorophyll"
+                }, {
+                    question: "Which pigment is responsible for photosynthesis?",
+                    options: ["Chlorophyll", "Carotene", "Xanthophyll", "Anthocyanin"],
+                    answer: "Chlorophyll"
+                }, {
+                    question: "What is the powerhouse of the cell?",
+                    options: ["Nucleus", "Mitochondria", "Chloroplast", "Ribosome"],
+                    answer: "Mitochondria"
+                }, {
+                    question: "Which part of the plant is responsible for transpiration?",
+                    options: ["Stem", "Root", "Leaf", "Flower"],
+                    answer: "Leaf"
+                }, {
+                    question: "What is the main function of xylem?",
+                    options: ["Transport of food", "Transport of water", "Photosynthesis", "Reproduction"],
+                    answer: "Transport of water"
+                }, {
+                    question: "Which tissue is responsible for transport of food in plants?",
+                    options: ["Xylem", "Phloem", "Parenchyma", "Collenchyma"],
+                    answer: "Phloem"
+                }, {
+                    question: "Which plant hormone is responsible for cell elongation?",
+                    options: ["Auxin", "Cytokinin", "Gibberellin", "Ethylene"],
+                    answer: "Auxin"
+                }, {
+                    question: "Which part of the plant helps in nitrogen fixation?",
+                    options: ["Stem", "Roots", "Leaves", "Flowers"],
+                    answer: "Roots"
+                }, {
+                    question: "Which type of root is found in monocots?",
+                    options: ["Tap root", "Fibrous root", "Adventitious root", "Tuberous root"],
+                    answer: "Fibrous root"
+                }, {
+                    question: "Which plant tissue is responsible for photosynthesis?",
+                    options: ["Xylem", "Phloem", "Parenchyma", "Collenchyma"],
+                    answer: "Parenchyma"
+                }, {
+                    question: "Which plant hormone is known as the stress hormone?",
+                    options: ["Gibberellin", "Abscisic Acid", "Cytokinin", "Ethylene"],
+                    answer: "Abscisic Acid"
+                }, {
+                    question: "What is the function of stomata?",
+                    options: ["Water absorption", "Photosynthesis", "Gaseous exchange", "Reproduction"],
+                    answer: "Gaseous exchange"
+                }, {
+                    question: "What is the female reproductive organ of a flower?",
+                    options: ["Stamen", "Pistil", "Sepal", "Petal"],
+                    answer: "Pistil"
+                }, {
+                    question: "Which part of the seed stores food?",
+                    options: ["Embryo", "Cotyledon", "Endosperm", "Seed coat"],
+                    answer: "Endosperm"
+                }, {
+                    question: "Which gas is released during photosynthesis?",
+                    options: ["Carbon dioxide", "Oxygen", "Nitrogen", "Hydrogen"],
+                    answer: "Oxygen"
+                }, {
+                    question: "What is the main function of root hairs?",
+                    options: ["Anchoring", "Water absorption", "Reproduction", "Photosynthesis"],
+                    answer: "Water absorption"
+                }, {
+                    question: "Which type of venation is found in dicots?",
+                    options: ["Parallel", "Reticulate", "Both", "None"],
+                    answer: "Reticulate"
+                }, {
+                    question: "Which part of a plant carries out photosynthesis?",
+                    options: ["Roots", "Stem", "Leaves", "Flower"],
+                    answer: "Leaves"
+                }, {
+                    question: "Which enzyme is responsible for carbon fixation in the Calvin cycle?",
+                    options: ["Rubisco", "Amylase", "Lipase", "Cellulase"],
+                    answer: "Rubisco"
+                }, {
+                    question: "Which part of a plant absorbs most of the water?",
+                    options: ["Stem", "Root hairs", "Leaves", "Flowers"],
+                    answer: "Root hairs"
+                }, {
+                    question: "What is the primary function of flowers?",
+                    options: ["Reproduction", "Food storage", "Photosynthesis", "Water transport"],
+                    answer: "Reproduction"
+                }, {
+                    question: "Which plant tissue provides mechanical support?",
+                    options: ["Xylem", "Phloem", "Collenchyma", "Parenchyma"],
+                    answer: "Collenchyma"
+                }, {
+                    question: "Which plant hormone is responsible for fruit ripening?",
+                    options: ["Auxin", "Gibberellin", "Ethylene", "Cytokinin"],
+                    answer: "Ethylene"
+                }, {
+                    question: "Which part of the plant produces pollen?",
+                    options: ["Stigma", "Ovary", "Anther", "Sepal"],
+                    answer: "Anther"
+                }, {
+                    question: "Which layer of a leaf contains chloroplasts?",
+                    options: ["Cuticle", "Epidermis", "Mesophyll", "Xylem"],
+                    answer: "Mesophyll"
+                }, {
+                    question: "What is the main function of lenticels?",
+                    options: ["Water transport", "Food transport", "Gaseous exchange", "Reproduction"],
+                    answer: "Gaseous exchange"
+                }, {
+                    question: "Which pigment is responsible for red and blue colors in plants?",
+                    options: ["Chlorophyll", "Carotenoids", "Anthocyanins", "Xanthophyll"],
+                    answer: "Anthocyanins"
+                }, {
+                    question: "What is the main function of cambium?",
+                    options: ["Water transport", "Food transport", "Secondary growth", "Photosynthesis"],
+                    answer: "Secondary growth"
+                }, {
+                    question: "Which type of pollination occurs within the same flower?",
+                    options: ["Cross-pollination", "Self-pollination", "Wind pollination", "Insect pollination"],
+                    answer: "Self-pollination"
+                }, {
+                    question: "Which of the following is a leguminous plant?",
+                    options: ["Mango", "Pea", "Coconut", "Pineapple"],
+                    answer: "Pea"
+                }, {
+                    question: "Which part of the plant stores food in potato?",
+                    options: ["Root", "Stem", "Leaf", "Flower"],
+                    answer: "Stem"
+                }, {
+                    question: "Which structure protects the tip of the root?",
+                    options: ["Root cap", "Root hairs", "Cortex", "Xylem"],
+                    answer: "Root cap"
+                }, {
+                    question: "Which part of the seed develops into the shoot?",
+                    options: ["Cotyledon", "Radicle", "Plumule", "Endosperm"],
+                    answer: "Plumule"
+                }, {
+                    question: "What is the term for plants that grow in water?",
+                    options: ["Xerophytes", "Mesophytes", "Hydrophytes", "Epiphytes"],
+                    answer: "Hydrophytes"
+                }, {
+                    question: "What is the term for movement in response to light?",
+                    options: ["Thigmotropism", "Phototropism", "Hydrotropism", "Geotropism"],
+                    answer: "Phototropism"
+                }, {
+                    question: "What is the main function of cotyledons?",
+                    options: ["Reproduction", "Water absorption", "Food storage", "Photosynthesis"],
+                    answer: "Food storage"
+                }, {
+                    question: "Which gas is essential for seed germination?",
+                    options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"],
+                    answer: "Oxygen"
+                }, {
+                    question: "Which type of fruit is formed without fertilization?",
+                    options: ["Drupe", "Berry", "Parthenocarpic", "Aggregate"],
+                    answer: "Parthenocarpic"
+                }, {
+                    question: "Which vascular tissue is responsible for conduction of minerals?",
+                    options: ["Xylem", "Phloem", "Parenchyma", "Collenchyma"],
+                    answer: "Xylem"
+                }, {
+                    question: "Which part of the plant is modified to form thorns?",
+                    options: ["Leaf", "Stem", "Root", "Flower"],
+                    answer: "Stem"
+                }, {
+                    question: "Which plant hormone is primarily responsible for maintaining apical dominance in plants?",
+                    options: ["Auxin", "Cytokinin", "Ethylene", "Gibberellin"],
+                    answer: "Auxin"
+                },
+
+                {
+                    question: "Which enzyme catalyzes the initial fixation of CO₂ in C₄ photosynthesis?",
+                    options: ["Rubisco", "PEP carboxylase", "NADP-malate dehydrogenase", "PEP carboxykinase"],
+                    answer: "PEP carboxylase"
+                },
+
+                {
+                    question: "What is the main function of the Casparian strip in the root endodermis?",
+                    options: ["Facilitates water uptake", "Blocks the apoplastic pathway", "Stores nutrients", "Secretes enzymes"],
+                    answer: "Blocks the apoplastic pathway"
+                },
+
+                {
+                    question: "How do CAM plants minimize water loss in arid conditions?",
+                    options: ["By opening stomata during the day", "By opening stomata at night", "By increasing leaf surface area", "By closing stomata permanently"],
+                    answer: "By opening stomata at night"
+                }
+
+            ],
+            zoology: [{
+                    question: "Which organ is responsible for filtering blood?",
+                    options: ["Liver", "Heart", "Kidney", "Lungs"],
+                    answer: "Kidney"
+                }, {
+                    question: "Which is the largest organ in the human body?",
+                    options: ["Heart", "Liver", "Skin", "Brain"],
+                    answer: "Skin"
+                }, {
+                    question: "Which organ in the human body produces insulin?",
+                    options: ["Liver", "Pancreas", "Kidney", "Stomach"],
+                    answer: "Pancreas"
+                }, {
+                    question: "What is the functional unit of the kidney?",
+                    options: ["Neuron", "Nephron", "Alveolus", "Hepatocyte"],
+                    answer: "Nephron"
+                }, {
+                    question: "Which blood cells are responsible for oxygen transport?",
+                    options: ["White blood cells", "Platelets", "Red blood cells", "Plasma"],
+                    answer: "Red blood cells"
+                }, {
+                    question: "Which part of the brain controls balance and coordination?",
+                    options: ["Cerebrum", "Cerebellum", "Medulla", "Hypothalamus"],
+                    answer: "Cerebellum"
+                }, {
+                    question: "Which vitamin is essential for blood clotting?",
+                    options: ["Vitamin A", "Vitamin B12", "Vitamin C", "Vitamin K"],
+                    answer: "Vitamin K"
+                }, {
+                    question: "Which hormone regulates blood sugar levels?",
+                    options: ["Thyroxine", "Insulin", "Adrenaline", "Glucagon"],
+                    answer: "Insulin"
+                }, {
+                    question: "Which blood group is known as the universal donor?",
+                    options: ["A", "B", "AB", "O"],
+                    answer: "O"
+                }, {
+                    question: "Which part of the digestive system absorbs nutrients?",
+                    options: ["Stomach", "Large intestine", "Small intestine", "Esophagus"],
+                    answer: "Small intestine"
+                }, {
+                    question: "Which type of joint is found in the shoulder?",
+                    options: ["Hinge joint", "Ball and socket joint", "Pivot joint", "Gliding joint"],
+                    answer: "Ball and socket joint"
+                }, {
+                    question: "Which animal is known as the largest mammal?",
+                    options: ["Elephant", "Blue whale", "Giraffe", "Hippopotamus"],
+                    answer: "Blue whale"
+                }, {
+                    question: "Which of the following is a cold-blooded animal?",
+                    options: ["Human", "Dog", "Frog", "Elephant"],
+                    answer: "Frog"
+                }, {
+                    question: "Which organ is responsible for filtering blood in the human body?",
+                    options: ["Liver", "Kidney", "Lungs", "Heart"],
+                    answer: "Kidney"
+                }, {
+                    question: "Which part of the human eye controls the amount of light entering?",
+                    options: ["Retina", "Iris", "Lens", "Cornea"],
+                    answer: "Iris"
+                }, {
+                    question: "Which disease is caused by Plasmodium?",
+                    options: ["Typhoid", "Malaria", "Dengue", "Cholera"],
+                    answer: "Malaria"
+                }, {
+                    question: "What is the largest organ in the human body?",
+                    options: ["Heart", "Liver", "Brain", "Skin"],
+                    answer: "Skin"
+                }, {
+                    question: "Which of the following is a reflex action?",
+                    options: ["Speaking", "Walking", "Blinking", "Writing"],
+                    answer: "Blinking"
+                }, {
+                    question: "Which chamber of the heart receives deoxygenated blood?",
+                    options: ["Left atrium", "Left ventricle", "Right atrium", "Right ventricle"],
+                    answer: "Right atrium"
+                }, {
+                    question: "Which blood vessel carries oxygenated blood from the lungs to the heart?",
+                    options: ["Pulmonary artery", "Pulmonary vein", "Aorta", "Vena cava"],
+                    answer: "Pulmonary vein"
+                }, {
+                    question: "Which part of the ear helps in maintaining balance?",
+                    options: ["Cochlea", "Semicircular canals", "Eardrum", "Stapes"],
+                    answer: "Semicircular canals"
+                }, {
+                    question: "What is the structural and functional unit of the nervous system?",
+                    options: ["Neuron", "Nephron", "Osteocyte", "Myocyte"],
+                    answer: "Neuron"
+                }, {
+                    question: "Which of the following is a marsupial?",
+                    options: ["Kangaroo", "Lion", "Elephant", "Horse"],
+                    answer: "Kangaroo"
+                }, {
+                    question: "Which part of the human brain regulates body temperature?",
+                    options: ["Cerebrum", "Cerebellum", "Medulla", "Hypothalamus"],
+                    answer: "Hypothalamus"
+                }, {
+                    question: "Which of the following is a sexually transmitted disease?",
+                    options: ["Tuberculosis", "Malaria", "HIV/AIDS", "Typhoid"],
+                    answer: "HIV/AIDS"
+                }, {
+                    question: "Which gas is carried by hemoglobin?",
+                    options: ["Oxygen", "Carbon dioxide", "Nitrogen", "Hydrogen"],
+                    answer: "Oxygen"
+                }, {
+                    question: "Which part of the human body produces bile?",
+                    options: ["Stomach", "Pancreas", "Liver", "Small intestine"],
+                    answer: "Liver"
+                }, {
+                    question: "Which organ stores bile?",
+                    options: ["Pancreas", "Liver", "Gallbladder", "Stomach"],
+                    answer: "Gallbladder"
+                }, {
+                    question: "Which gland secretes adrenaline?",
+                    options: ["Thyroid", "Pituitary", "Adrenal", "Pancreas"],
+                    answer: "Adrenal"
+                }, {
+                    question: "Which of the following is an example of an amphibian?",
+                    options: ["Snake", "Crocodile", "Frog", "Lizard"],
+                    answer: "Frog"
+                }, {
+                    question: "Which of the following is a characteristic of mammals?",
+                    options: ["Cold-blooded", "Lays eggs", "Have mammary glands", "Have scales"],
+                    answer: "Have mammary glands"
+                }, {
+                    question: "Which is the longest bone in the human body?",
+                    options: ["Humerus", "Femur", "Tibia", "Fibula"],
+                    answer: "Femur"
+                }, {
+                    question: "Which structure connects muscles to bones?",
+                    options: ["Ligament", "Cartilage", "Tendon", "Bone marrow"],
+                    answer: "Tendon"
+                }, {
+                    question: "Which of the following is a protein found in hair and nails?",
+                    options: ["Keratin", "Collagen", "Elastin", "Myosin"],
+                    answer: "Keratin"
+                }, {
+                    question: "Which of the following is a function of the liver?",
+                    options: ["Production of red blood cells", "Filtration of blood", "Bile production", "Storage of urine"],
+                    answer: "Bile production"
+                }, {
+                    question: "Which animal has the longest lifespan?",
+                    options: ["Elephant", "Bowhead whale", "Tortoise", "Crocodile"],
+                    answer: "Bowhead whale"
+                }, {
+                    question: "Which type of blood cell helps in clotting?",
+                    options: ["Red blood cells", "White blood cells", "Platelets", "Plasma"],
+                    answer: "Platelets"
+                }, {
+                    question: "What is the normal pH of human blood?",
+                    options: ["5.0", "6.5", "7.4", "8.0"],
+                    answer: "7.4"
+                }, {
+                    question: "Which of the following is a cartilaginous fish?",
+                    options: ["Shark", "Goldfish", "Salmon", "Tuna"],
+                    answer: "Shark"
+                }, {
+                    question: "Which organ system is responsible for producing hormones?",
+                    options: ["Nervous system", "Endocrine system", "Respiratory system", "Digestive system"],
+                    answer: "Endocrine system"
+                }, {
+                    question: "Which organ in the body detoxifies harmful substances?",
+                    options: ["Liver", "Kidney", "Lungs", "Heart"],
+                    answer: "Liver"
+                }, {
+                    question: "Which disease is caused by deficiency of vitamin D?",
+                    options: ["Scurvy", "Rickets", "Pellagra", "Beri-beri"],
+                    answer: "Rickets"
+                }, {
+                    question: "Which immunoglobulin is predominantly found in mucosal secretions, playing a critical role in mucosal immunity?",
+                    options: ["IgA", "IgM", "IgG", "IgE"],
+                    answer: "IgA"
+                },
+
+                {
+                    question: "Which structure in the vertebrate brain is primarily responsible for regulating the circadian rhythm and sleep-wake cycles?",
+                    options: ["Pineal gland", "Suprachiasmatic nucleus", "Hypothalamus", "Thalamus"],
+                    answer: "Suprachiasmatic nucleus"
+                },
+
+                {
+                    question: "Which type of T lymphocyte is chiefly responsible for cell-mediated immunity against intracellular pathogens?",
+                    options: ["CD4+ T helper cells", "CD8+ cytotoxic T cells", "Regulatory T cells", "B cells"],
+                    answer: "CD8+ cytotoxic T cells"
+                }
+
+            ],
+        };
+
+        function loadQuestions() {
+            Object.keys(questions).forEach(subject => {
+                let container = document.getElementById(`${subject}-questions`);
+                questions[subject].forEach((q, index) => {
+                    let questionElement = document.createElement("div");
+                    questionElement.classList.add("question");
+                    questionElement.innerHTML = `<p>${index + 1}. ${q.question}</p>`;
+                    let optionsContainer = document.createElement("div");
+                    optionsContainer.classList.add("options");
+                    q.options.forEach(option => {
+                        let label = document.createElement("label");
+                        label.innerHTML = `<input type="radio" name="${subject}_q${index}" value="${option}"> ${option}`;
+                        optionsContainer.appendChild(label);
+                    });
+                    questionElement.appendChild(optionsContainer);
+                    container.appendChild(questionElement);
+                });
+            });
+            document.getElementById("submit-btn").style.display = "block";
+        }
+
+        function calculateScore() {
+            clearInterval(interval); // Stop the timer
+            let score = 0;
+            let correctCount = 0;
+            detailedResultHTML = "<h3>Detailed Breakdown:</h3>";
+            let totalQuestions = 0;
+            Object.keys(questions).forEach(subject => {
+                totalQuestions += questions[subject].length;
+                questions[subject].forEach((q, index) => {
+                    const selected = document.querySelector(`input[name="${subject}_q${index}"]:checked`);
+                    if (selected) {
+                        if (selected.value === q.answer) {
+                            score += 4;
+                            correctCount++;
+                            detailedResultHTML += `<p>${q.question}<br><strong>Correct Answer:</strong> ${q.answer}<br><strong>Your Answer:</strong> ${selected.value}</p>`;
+                        } else {
+                            score -= 1;
+                            detailedResultHTML += `<p>${q.question}<br><strong>Correct Answer:</strong> ${q.answer}<br><strong>Your Answer:</strong> ${selected.value}</p>`;
+                        }
+                    } else {
+                        detailedResultHTML += `<p>${q.question}<br><strong>Correct Answer:</strong> ${q.answer}<br><strong>Your Answer:</strong> Not Attempted</p>`;
+                    }
+                });
+            });
+            // Calculate time taken
+            let endTime = new Date();
+            let timeTakenSec = Math.floor((endTime - startTime) / 1000);
+            let hrs = Math.floor(timeTakenSec / 3600);
+            let mins = Math.floor((timeTakenSec % 3600) / 60);
+            let secs = timeTakenSec % 60;
+            hrs = hrs < 10 ? "0" + hrs : hrs;
+            mins = mins < 10 ? "0" + mins : mins;
+            secs = secs < 10 ? "0" + secs : secs;
+            let timeTakenFormatted = `${hrs}:${mins}:${secs}`;
+
+            // Calculate accuracy as a percentage
+            let accuracy = ((correctCount / totalQuestions) * 100).toFixed(2);
+            // Calculate average time per question (in seconds)
+            let avgTimePerQuestion = (timeTakenSec / totalQuestions).toFixed(2);
+
+            let secureScoreHTML = "<h3>Your Score:</h3>";
+            secureScoreHTML += `<p><strong>Total Score:</strong> ${score} / ${totalQuestions * 4}</p>`;
+            secureScoreHTML += `<p><strong>Time Taken:</strong> ${timeTakenFormatted}</p>`;
+            secureScoreHTML += `<p><strong>Accuracy:</strong> ${accuracy}%</p>`;
+            secureScoreHTML += `<p><strong>Average Time per Question:</strong> ${avgTimePerQuestion} seconds</p>`;
+
+            document.getElementById("result-container").innerHTML = secureScoreHTML;
+            document.getElementById("result-container").style.display = "block";
+            document.getElementById("show-details-btn").style.display = "block";
+        }
+
+        function toggleDetails() {
+            const detailsContainer = document.getElementById("details-container");
+            const showDetailsBtn = document.getElementById("show-details-btn");
+            if (detailsContainer.style.display === "block") {
+                detailsContainer.style.display = "none";
+                showDetailsBtn.innerText = "Show Correct Answers";
+            } else {
+                detailsContainer.innerHTML = detailedResultHTML;
+                detailsContainer.style.display = "block";
+                showDetailsBtn.innerText = "Hide Correct Answers";
+            }
+        }
+
+        document.getElementById("submit-btn").addEventListener("click", calculateScore);
+    </script>
+</body>
+
+</html>
